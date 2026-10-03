@@ -47,7 +47,6 @@ nosetests.xml
 coverage.xml
 *.cover
 *.py.cover
-*.lcov
 .hypothesis/
 .pytest_cache/
 cover/
@@ -95,7 +94,7 @@ ipython_config.py
 #   install all needed dependencies.
 # Pipfile.lock
 
-# uv
+# UV
 #   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
 #   This is especially recommended for binary packages to ensure reproducibility, and is more
 #   commonly ignored for libraries.
@@ -123,14 +122,13 @@ ipython_config.py
 # pixi.lock
 #   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one
 #   in the .venv directory. It is recommended not to include this directory in version control.
-.pixi/*
-!.pixi/config.toml
+.pixi
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
 
 # Celery stuff
-celerybeat-schedule*
+celerybeat-schedule
 celerybeat.pid
 
 # Redis
@@ -166,7 +164,7 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
-# mkdocs/Zensical documentation
+# mkdocs documentation
 /site
 
 # mypy
@@ -197,11 +195,11 @@ cython_debug/
 .abstra/
 
 # Visual Studio Code
-#   Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore that
-#   can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
-#   and can be added to the global gitignore or merged into this file. However, if you prefer, you
-#   could uncomment the following to ignore the entire vscode folder
-# .vscode/
+#   Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
+#   that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
+#   and can be added to the global gitignore or merged into this file. However, if you prefer, 
+#   you could uncomment the following to ignore the entire vscode folder
+.vscode/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
@@ -218,3 +216,95 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+log/
+build/
+install/
+
+.claude
+.codex
+.agent
+
+# Ruflo local secrets and runtime data
+.env.local
+.env.*.local
+.claude-flow/data/
+.claude-flow/logs/
+.claude-flow/sessions/
+
+# Codex local configuration
+.codex/
+# Claude Flow runtime data
+# Environment variables
+.agents/
+.claude-flow/
+.serena/
+.swarm/
+AGENTS.md
+CLAUDE.md
+ruvector.db
+
+space_robotics_bench/.docker/.history/
+dist/
+wheels/
+*.egg-info
+
+## Virtual environments
+.venv
+
+## Rust
+debug/
+target/
+**/*.rs.bk
+
+## MdBook
+docs/book/
+docs/index.html
+
+## Docker History
+.docker/.history/
+
+## Shared Objects
+**/*.so
+
+## Apptainer
+**/*.sif
+
+## Logs
+*.log
+logs/
+outputs/
+wandb/
+
+## Offline SRB cache
+.cache
+
+## Dump files
+**/core.*
+
+## OS / Editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Firebase service account keys (never commit)
+serviceAccount*.json
+*-firebase-adminsdk-*.json
+.vscode/settings.json
+graphify-out/
+graphify*
+.vscode/settings.json
+
+images
+for_yolo
+bags/bags/
+*.mcap
+*.pt
+yolo_train/
+runs/*_track/
+runs/*_predict/
+runs/*_test/
+!runs/car_dummy*/stats/

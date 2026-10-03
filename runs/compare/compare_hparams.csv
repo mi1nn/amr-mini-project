@@ -1,0 +1,6 @@
+﻿hparam,모델별로 다름,car_dummy_v8n,car_dummy_v8s,car_dummy_11n,car_dummy_11s,car_dummy_26n,car_dummy_26s
+epochs,,100,100,100,100,100,100
+patience,,20,20,20,20,20,20
+imgsz,,640,640,640,640,640,640
+batch,,16,16,16,16,16,16
+workers,,2,2,2,2,2,2

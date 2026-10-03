@@ -1,0 +1,67 @@
+# YOLO 학습 통계 (car_dummy_v8n, model=yolov8n.pt)
+
+## 학습 정보
+- 모델: yolov8n.pt
+- Epochs: 설정 100 / 실제 100 / best 94 (patience 20)
+- 종료 상태: 설정한 epoch까지 완료
+- Total Training Time: 1분 17초 (results.csv 기준)
+- 실제 소요 시간(준비·최종 검증 포함): 1분 22초
+- Training Hyper Parameters (학습 노트북 TRAIN_ARGS (train_info.yaml)):
+    epochs: 100
+    patience: 20
+    imgsz: 640
+    batch: 16
+    workers: 2
+
+## 핵심 지표 (test, best.pt)
+- mAP50 / mAP50-95: 0.9950 / 0.9493
+- F1-Confidence: 최고 F1 0.9977 (confidence 0.818)
+- % Correct Predictions @conf 0.25: 100.00% (예측 박스 중 IoU>=0.5로 맞은 비율)
+- Average Confidence @conf 0.25: 0.9336
+- Inference Speed (batch=1, 10장 평균): preprocess 0.49 + inference 2.75 + postprocess 0.46 = 3.70 ms/img (270.0 FPS)
+
+## 전체 성능 (best.pt)
+split  precision  recall     F1  mAP50  mAP75  mAP50-95  best F1 (F1-Confidence)  best F1 conf  % Correct @0.25  Avg Conf @0.25
+  val     0.9952  1.0000 0.9976 0.9950 0.9950    0.9688                   0.9986        0.7908         100.0000          0.9474
+ test     0.9918  1.0000 0.9959 0.9950 0.9950    0.9493                   0.9977        0.8178         100.0000          0.9336
+
+## 클래스별 성능
+split class  GT boxes  precision  recall     F1  mAP50  mAP50-95
+  val   car        25     0.9978  1.0000 0.9989 0.9950    0.9755
+  val dummy        25     0.9926  1.0000 0.9963 0.9950    0.9620
+ test   car        12     0.9961  1.0000 0.9981 0.9950    0.9137
+ test dummy        12     0.9875  1.0000 0.9937 0.9950    0.9849
+
+## 예측 분석 (IoU>=0.5 매칭, conf 기준 0.25 / best F1 conf)
+split  conf 기준 class  정답 박스  예측 박스  정답(TP)  오탐(FP)  미탐(FN)  % Correct Predictions    탐지율 %  Average Confidence  Avg Conf (TP)  Avg Conf (FP)
+  val   0.2500   car     25     25      25       0       0               100.0000 100.0000              0.9353         0.9353            NaN
+  val   0.2500 dummy     25     25      25       0       0               100.0000 100.0000              0.9596         0.9596            NaN
+  val   0.2500   all     50     50      50       0       0               100.0000 100.0000              0.9474         0.9474            NaN
+  val   0.7910   car     25     24      24       0       1               100.0000  96.0000              0.9430         0.9430            NaN
+  val   0.7910 dummy     25     25      25       0       0               100.0000 100.0000              0.9596         0.9596            NaN
+  val   0.7910   all     50     49      49       0       1               100.0000  98.0000              0.9514         0.9514            NaN
+ test   0.2500   car     12     12      12       0       0               100.0000 100.0000              0.9204         0.9204            NaN
+ test   0.2500 dummy     12     12      12       0       0               100.0000 100.0000              0.9467         0.9467            NaN
+ test   0.2500   all     24     24      24       0       0               100.0000 100.0000              0.9336         0.9336            NaN
+ test   0.8180   car     12     12      12       0       0               100.0000 100.0000              0.9204         0.9204            NaN
+ test   0.8180 dummy     12     12      12       0       0               100.0000 100.0000              0.9467         0.9467            NaN
+ test   0.8180   all     24     24      24       0       0               100.0000 100.0000              0.9336         0.9336            NaN
+
+## 에폭 기록 요약
+            항목  best epoch 값  마지막 epoch 값  최적값(지표=최고, loss=최저)  최적 epoch  마지막 10 epoch 평균  마지막 10 epoch 표준편차
+     precision        0.9952       0.9967               1.0000        13           0.9962             0.0008
+        recall        1.0000       1.0000               1.0000        21           1.0000             0.0000
+         mAP50        0.9950       0.9950               0.9950        17           0.9950             0.0000
+      mAP50-95        0.9688       0.9668               0.9688        94           0.9660             0.0018
+train box_loss        0.3359       0.2865               0.2820        99           0.3027             0.0159
+  val box_loss        0.2584       0.2522               0.2521        99           0.2615             0.0097
+train cls_loss        0.3761       0.3307               0.3307       100           0.3575             0.0144
+  val cls_loss        0.3310       0.3071               0.3042        99           0.3240             0.0175
+train dfl_loss        0.8161       0.8128               0.7856        96           0.8078             0.0134
+  val dfl_loss        0.8229       0.8223               0.7672         1           0.8231             0.0011
+
+## 라벨 박스 수
+split  test  train  valid
+class                    
+car      12     87     25
+dummy    12     87     25

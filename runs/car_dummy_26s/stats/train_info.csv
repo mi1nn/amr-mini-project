@@ -1,0 +1,16 @@
+﻿항목,값
+model,yolo26s.pt
+설정 epochs,100
+실제 학습 epochs,91
+best epoch,71
+patience,20
+조기 종료,예
+종료 상태,"조기 종료 (epoch 91에서 종료, 20 epoch 동안 개선 없음)"
+Total Training Time (s),171.4
+Total Training Time,2분 51초
+"실제 소요 시간 (s, 노트북 측정)",175.6
+hparam: epochs,100
+hparam: patience,20
+hparam: imgsz,640
+hparam: batch,16
+hparam: workers,2

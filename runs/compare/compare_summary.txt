@@ -1,0 +1,65 @@
+# YOLO 모델 비교 (6개)
+- test mAP50-95 최고: car_dummy_26n (yolo26n.pt) = 0.9773
+- 추론 속도 최고: car_dummy_26n (yolo26n.pt) = 3.17 ms/img (315.5 FPS)
+- % Correct Predictions = conf >= 0.25 예측 중 정답 박스와 IoU >= 0.5로 맞은 비율
+- 속도는 이 PC에서 batch=1로 측정한 전처리+추론+후처리 시간 (로봇/다른 장비에서는 달라짐)
+
+## 학습 정보
+          run      model  설정 epochs  실제 epochs  best epoch  patience 조기 종료 Total Training Time
+car_dummy_v8n yolov8n.pt        100        100          94        20   아니오              1분 17초
+car_dummy_v8s yolov8s.pt        100         21           1        20     예              0분 32초
+car_dummy_11n yolo11n.pt        100        100          82        20   아니오              1분 21초
+car_dummy_11s yolo11s.pt        100         98          78        20     예              2분 32초
+car_dummy_26n yolo26n.pt        100         65          45        20     예              1분 03초
+car_dummy_26s yolo26s.pt        100         91          71        20     예              2분 51초
+
+## Training Hyper Parameters (* = 모델별로 다른 값)
+         모델별로 다름 car_dummy_v8n car_dummy_v8s car_dummy_11n car_dummy_11s car_dummy_26n car_dummy_26s
+hparam                                                                                              
+epochs                     100           100           100           100           100           100
+patience                    20            20            20            20            20            20
+imgsz                      640           640           640           640           640           640
+batch                       16            16            16            16            16            16
+workers                      2             2             2             2             2             2
+
+## 모델 크기 / 추론 속도 (batch=1)
+          run  params (M)  GFLOPs  best.pt (MB)  preprocess ms  inference ms  postprocess ms  total ms/img      FPS
+car_dummy_v8n      3.0112  8.1928        6.2562         0.5563        2.5618          0.3608        3.4789 287.4508
+car_dummy_v8s     11.1364 28.6442       22.5159         0.5678        6.1097          0.4266        7.1041 140.7638
+car_dummy_11n      2.5902  6.5007        5.4787         0.5504        2.2728          0.3562        3.1794 314.5293
+car_dummy_11s      9.4286 21.6686       19.1863         0.5532        5.2419          0.3665        6.1616 162.2955
+car_dummy_26n      2.5046  5.8943        5.3896         0.5464        2.2603          0.3625        3.1693 315.5295
+car_dummy_26s      9.9494 22.7439       20.3182         0.5894        6.1791          0.4565        7.2250 138.4076
+
+## val 성능
+          run  val precision  val recall  val F1  val mAP50  val mAP50-95  val best F1  val best F1 conf
+car_dummy_v8n         0.9952      1.0000  0.9976     0.9950        0.9688       0.9986            0.7908
+car_dummy_v8s         0.4819      0.5000  0.4908     0.5425        0.4869       0.5423            0.0290
+car_dummy_11n         0.9975      1.0000  0.9987     0.9950        0.9597       0.9997            0.9349
+car_dummy_11s         0.9954      1.0000  0.9977     0.9950        0.9331       0.9987            0.7728
+car_dummy_26n         0.9957      1.0000  0.9978     0.9950        0.9521       0.9987            0.8058
+car_dummy_26s         0.9971      1.0000  0.9986     0.9950        0.9628       0.9995            0.8719
+
+## test 성능
+          run  test precision  test recall  test F1  test mAP50  test mAP50-95  test best F1  test best F1 conf
+car_dummy_v8n          0.9918       1.0000   0.9959      0.9950         0.9493        0.9977             0.8178
+car_dummy_v8s          0.5210       0.5417   0.5311      0.5669         0.4998        0.6116             0.0460
+car_dummy_11n          0.9948       1.0000   0.9974      0.9950         0.9637        0.9992             0.9229
+car_dummy_11s          0.9912       1.0000   0.9956      0.9950         0.9285        0.9971             0.7588
+car_dummy_26n          0.9942       1.0000   0.9971      0.9950         0.9773        0.9992             0.8989
+car_dummy_26s          0.9950       1.0000   0.9975      0.9950         0.9613        0.9997             0.9019
+
+## test 예측 분석 (conf >= 0.25)
+          run  test % Correct  test 탐지율 %  test Avg Conf  test Avg Conf (TP)
+car_dummy_v8n        100.0000    100.0000         0.9336              0.9336
+car_dummy_v8s        100.0000     45.8333         0.7205              0.7205
+car_dummy_11n        100.0000    100.0000         0.9687              0.9687
+car_dummy_11s        100.0000    100.0000         0.8900              0.8900
+car_dummy_26n        100.0000    100.0000         0.9428              0.9428
+car_dummy_26s        100.0000    100.0000         0.9235              0.9235
+
+## 클래스별 test mAP50-95
+run    car_dummy_v8n (yolov8n)  car_dummy_v8s (yolov8s)  car_dummy_11n (yolo11n)  car_dummy_11s (yolo11s)  car_dummy_26n (yolo26n)  car_dummy_26s (yolo26s)
+class                                                                                                                                                      
+car                     0.9137                   0.8774                   0.9405                   0.8895                   0.9696                   0.9533
+dummy                   0.9849                   0.1222                   0.9870                   0.9675                   0.9849                   0.9692

@@ -1,0 +1,8 @@
+model: yolov8s.pt
+user_hparams:
+  epochs: 100
+  patience: 50
+  imgsz: 640
+  batch: 16
+  workers: 2
+wall_time_s: 154.3

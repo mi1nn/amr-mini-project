@@ -1,0 +1,34 @@
+# YOLO 학습 통계 (car_dummy, model=yolov8n.pt)
+- 총 epoch: 100 / best epoch: 94 (fitness = 0.1*mAP50 + 0.9*mAP50-95)
+- 총 학습 시간: 1.2분
+
+## 전체 성능 (best.pt)
+split  precision  recall     F1  mAP50  mAP75  mAP50-95  inference ms/img
+  val     0.9952  1.0000 0.9976 0.9950 0.9950    0.9688            4.8430
+ test     0.9918  1.0000 0.9959 0.9950 0.9950    0.9493            5.5710
+
+## 클래스별 성능
+split class  GT boxes  precision  recall     F1  mAP50  mAP50-95
+  val   car        25     0.9978  1.0000 0.9989 0.9950    0.9755
+  val dummy        25     0.9926  1.0000 0.9963 0.9950    0.9620
+ test   car        12     0.9961  1.0000 0.9981 0.9950    0.9137
+ test dummy        12     0.9875  1.0000 0.9937 0.9950    0.9849
+
+## 에폭 기록 요약
+            항목  best epoch 값  마지막 epoch 값  최적값(지표=최고, loss=최저)  최적 epoch  마지막 10 epoch 평균  마지막 10 epoch 표준편차
+     precision        0.9952       0.9967               1.0000        13           0.9962             0.0008
+        recall        1.0000       1.0000               1.0000        21           1.0000             0.0000
+         mAP50        0.9950       0.9950               0.9950        17           0.9950             0.0000
+      mAP50-95        0.9688       0.9668               0.9688        94           0.9660             0.0018
+train box_loss        0.3359       0.2865               0.2820        99           0.3027             0.0159
+  val box_loss        0.2584       0.2522               0.2521        99           0.2615             0.0097
+train cls_loss        0.3761       0.3307               0.3307       100           0.3575             0.0144
+  val cls_loss        0.3310       0.3071               0.3042        99           0.3240             0.0175
+train dfl_loss        0.8161       0.8128               0.7856        96           0.8078             0.0134
+  val dfl_loss        0.8229       0.8223               0.7672         1           0.8231             0.0011
+
+## 라벨 박스 수
+split  test  train  valid
+class                    
+car      12     87     25
+dummy    12     87     25
