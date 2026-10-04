@@ -27,6 +27,7 @@ setup(
             'depth_checker = rokey_pjt.depth_checker:main',
             'depth_checker_mouse = rokey_pjt.depth_checker_mouse:main',
             'depth_check_claude = rokey_pjt.depth_check_claude:main',
+            'yolo_detector = rokey_pjt.yolo_detector:main',
         ],
     },
 )
