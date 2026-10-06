@@ -35,7 +35,7 @@ def main():
     navigator.undock()
 
     # Set initial pose
-    initial_pose = navigator.getPoseStamped([0.0, 0.0], TurtleBot4Directions.NORTH)
+    initial_pose = navigator.getPoseStamped([-0.0796549, 1.65755], TurtleBot4Directions.NORTH)
     navigator.setInitialPose(initial_pose)
 
     # Wait for Nav2
@@ -48,10 +48,15 @@ def main():
     # goal_pose.append(navigator.getPoseStamped([2.0, 1.0], TurtleBot4Directions.SOUTH))
     # goal_pose.append(navigator.getPoseStamped([-1.0, 0.0], TurtleBot4Directions.NORTH))
 
-    goal_pose.append(navigator.getPoseStamped([-1.55069, 0.0668084], TurtleBot4Directions.WEST))
-    goal_pose.append(navigator.getPoseStamped([-0.761671, -0.852567], TurtleBot4Directions.SOUTH))
-    goal_pose.append(navigator.getPoseStamped([0.0343325, -1.96793], TurtleBot4Directions.EAST))
-    goal_pose.append(navigator.getPoseStamped([-0.711899, -0.0612125], TurtleBot4Directions.NORTH))
+    # goal_pose.append(navigator.getPoseStamped([-1.55069, 0.0668084], TurtleBot4Directions.WEST))
+    # goal_pose.append(navigator.getPoseStamped([-0.761671, -0.852567], TurtleBot4Directions.SOUTH))
+    # goal_pose.append(navigator.getPoseStamped([0.0343325, -1.96793], TurtleBot4Directions.EAST))
+    # goal_pose.append(navigator.getPoseStamped([-0.711899, -0.0612125], TurtleBot4Directions.NORTH))
+
+    goal_pose.append(navigator.getPoseStamped([-4.260561466217041, 3.7598459720611572], TurtleBot4Directions.WEST))
+    goal_pose.append(navigator.getPoseStamped([-1.8533298969268799, 5.070459365844727], TurtleBot4Directions.SOUTH))
+    goal_pose.append(navigator.getPoseStamped([ -1.7536218166351318, 7.12185525894165], TurtleBot4Directions.EAST))
+    goal_pose.append(navigator.getPoseStamped([-2.92162823677063, 2.1215782165527344], TurtleBot4Directions.NORTH))
 
     # Follow Waypoints
     navigator.startFollowWaypoints(goal_pose)

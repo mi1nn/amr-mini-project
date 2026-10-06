@@ -42,7 +42,7 @@ def main():
     navigator.undock()
 
     # Set initial pose
-    initial_pose = navigator.getPoseStamped([0.0, 0.0], TurtleBot4Directions.NORTH)
+    initial_pose = navigator.getPoseStamped([-0.0796549, 1.65755], TurtleBot4Directions.NORTH)
     navigator.clearAllCostmaps()
     navigator.setInitialPose(initial_pose)
 

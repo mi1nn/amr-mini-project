@@ -28,6 +28,8 @@ setup(
             'depth_checker_mouse = rokey_pjt.depth_checker_mouse:main',
             'depth_check_claude = rokey_pjt.depth_check_claude:main',
             'yolo_detector = rokey_pjt.yolo_detector:main',
+            'calibrate_webcam = rokey_pjt.calibrate_webcam:main',
+            'rc_car_follower = rokey_pjt.rc_car_follower:main',
         ],
     },
 )
