@@ -1,17 +1,14 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>rokey_pjt</name>
+  <name>test_nv2</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="alekdi8gm30@gmail.com">hv-06</maintainer>
+  <maintainer email="godbs3411@gmail.com">mu-06</maintainer>
   <license>TODO: License declaration</license>
 
-  <exec_depend>rclpy</exec_depend>
-  <exec_depend>irobot_create_msgs</exec_depend>
-  <exec_depend>builtin_interfaces</exec_depend>
-  <exec_depend>vision_msgs</exec_depend>
-  <exec_depend>visualization_msgs</exec_depend>
+  <depend>rclpy</depend>
+  <depend>turtlebot4_navigation</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

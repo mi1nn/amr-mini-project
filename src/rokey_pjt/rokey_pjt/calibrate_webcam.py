@@ -19,7 +19,7 @@ from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
 # ================================
 WEBCAM_INDEX = 2  # 0: 노트북 내장(HP Wide Vision), 2: USB 웹캠
 FRAME_SIZE = (640, 480)
-H_PATH = '/home/hv-06/rokey_ws/webcam_H.npy'
+H_PATH = '/home/mu-06/rokey_ws/webcam_H.npy'
 MIN_POINTS = 4
 CLICKED_TOPIC = '/robot6/clicked_point'  # RViz Publish Point
 AMCL_TOPIC = '/robot6/amcl_pose'         # 로봇을 점 위에 세워 두고 사용

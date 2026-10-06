@@ -13,6 +13,7 @@ import cv2
 import numpy as np
 import rclpy
 from geometry_msgs.msg import PoseStamped, TwistStamped
+from lifecycle_msgs.srv import GetState
 from rclpy.node import Node
 from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
 from rclpy.time import Time
@@ -28,7 +29,7 @@ TARGET_TOPIC = '/webcam/target_pose/car'               # 웹캠 PC 가 발행 (m
 RGB_TOPIC = 'oakd/rgb/image_raw/compressed'            # 아래 3개는 __ns:=/robot6 기준 상대 이름
 DEPTH_TOPIC = 'oakd/stereo/image_raw/compressedDepth'
 CMD_TOPIC = 'cmd_vel'
-MODEL_PATH = '/home/hv-06/rokey_ws/my_best26n.pt'
+MODEL_PATH = '/home/mu-06/rokey_ws/my_best26n.pt'
 CONF_THRESHOLD = 0.5
 CAR_CLASS = 'car'
 # 접근 단계 (Nav2)
@@ -77,11 +78,34 @@ class RcCarFollower(Node):
         self.create_subscription(CompressedImage, DEPTH_TOPIC, self.on_depth, qos)
 
         self.navigator = TurtleBot4Navigator()
-        self.navigator.waitUntilNav2Active()
+        self.wait_lifecycle_active('amcl')
+        self.wait_lifecycle_active('bt_navigator')
+        self.navigator.waitUntilNav2Active()  # 위에서 active 를 확인했으므로 초기 pose 수신만 남아 바로 통과
         self.mode = 'approach'
         self.last_seen = 0.0
         self.last_goal = None
         self.last_send = 0.0
+
+    def wait_lifecycle_active(self, node_name, call_timeout=2.0):
+        """<ns>/<node_name>/get_state 에 요청을 보내 active 가 될 때까지 대기 (예: /robot6/amcl/get_state).
+        waitUntilNav2Active 는 응답이 없으면 로그 없이 멈추므로, 서비스 이름/응답 상태를 로그로 남긴다."""
+        srv = f'{self.get_namespace().rstrip("/")}/{node_name}/get_state'
+        client = self.create_client(GetState, srv)
+        while not client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info(f'{srv} 서비스 대기 중...')
+        state = 'unknown'
+        while state != 'active':
+            future = client.call_async(GetState.Request())
+            rclpy.spin_until_future_complete(self, future, timeout_sec=call_timeout)
+            if future.done() and future.result() is not None:
+                state = future.result().current_state.label
+                self.get_logger().info(f'{srv} 상태: {state}')
+            else:
+                future.cancel()
+                self.get_logger().warn(f'{srv} 요청 후 {call_timeout}초 내 응답 없음, 재요청')
+            if state != 'active':
+                time.sleep(1.0)
+        self.destroy_client(client)
 
     def on_target(self, msg):
         self.target = (msg.pose.position.x, msg.pose.position.y, time.monotonic())
@@ -172,17 +196,30 @@ class RcCarFollower(Node):
         return t.transform.translation.x, t.transform.translation.y
 
     def approach(self):
-        if self.target is None or time.monotonic() - self.target[2] > TARGET_TIMEOUT:
+        log = self.get_logger()
+        if self.target is None:
+            log.info(f'웹캠 좌표 미수신 ({TARGET_TOPIC}): webcam_detector 실행/탐지 여부 확인', throttle_duration_sec=3.0)
+            return
+        age = time.monotonic() - self.target[2]
+        if age > TARGET_TIMEOUT:
+            log.info(f'웹캠 좌표가 {age:.1f}초 전 것 (>{TARGET_TIMEOUT}초) -> 무시: RC카가 웹캠에서 탐지되는지 확인',
+                     throttle_duration_sec=3.0)
             return
         robot = self.robot_xy()
-        if robot is None or time.monotonic() - self.last_send < GOAL_PERIOD:
+        if robot is None:
+            log.warn("map->base_link TF 없음: '--ros-args -r /tf:=tf -r /tf_static:=tf_static' 로 실행했는지 확인",
+                     throttle_duration_sec=3.0)
+            return
+        if time.monotonic() - self.last_send < GOAL_PERIOD:
             return
         cx, cy, _ = self.target
         dx, dy = cx - robot[0], cy - robot[1]
         dist = math.hypot(dx, dy)
         if dist < STANDOFF + ARRIVE_MARGIN:  # 도착 (로봇 카메라에 안 보이면 여기서 대기)
-            self.navigator.cancelTask()
-            self.last_goal = None
+            if self.last_goal is not None:  # 활성 goal 이 있을 때만 1회 취소 (매 루프 취소 방지)
+                self.navigator.cancelTask()
+                self.last_goal = None
+                log.info(f'RC카까지 {dist:.2f}m: 도착, goal 취소 후 대기 (로봇 카메라에 안 보임)')
             return
         gx, gy = cx - STANDOFF * dx / dist, cy - STANDOFF * dy / dist
         moved = self.last_goal is None or math.hypot(gx - self.last_goal[0], gy - self.last_goal[1]) > GOAL_MOVE_THRESH
