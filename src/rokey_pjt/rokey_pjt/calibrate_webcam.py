@@ -1,15 +1,18 @@
 """웹캠 픽셀 -> map 좌표 호모그래피 캘리브레이션.
 
-사용법: 웹캠 창에서 바닥 점을 클릭 -> RViz2 'Publish Point'로 같은 점을 클릭 (반복).
-키: s=계산+저장, u=마지막 점 취소, q=종료
+사용법: 웹캠 창에서 바닥 점을 클릭한 뒤, map 좌표를 둘 중 하나로 입력 (반복).
+  (1) RViz2 'Publish Point'로 같은 점을 클릭
+  (2) 로봇을 그 점(로봇 중심 바닥)에 세워 두고 웹캠 창에서 'a' -> 현재 /amcl_pose 사용
+키: a=amcl 위치 사용, s=계산+저장, u=마지막 점 취소, q=종료
 """
 import threading
 
 import cv2
 import numpy as np
 import rclpy
-from geometry_msgs.msg import PointStamped
+from geometry_msgs.msg import PointStamped, PoseWithCovarianceStamped
 from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
 
 # ================================
 # 설정 상수 (rc_car_follower 와 공유)
@@ -18,6 +21,8 @@ WEBCAM_INDEX = 2  # 0: 노트북 내장(HP Wide Vision), 2: USB 웹캠
 FRAME_SIZE = (640, 480)
 H_PATH = '/home/hv-06/rokey_ws/webcam_H.npy'
 MIN_POINTS = 4
+CLICKED_TOPIC = '/robot6/clicked_point'  # RViz Publish Point
+AMCL_TOPIC = '/robot6/amcl_pose'         # 로봇을 점 위에 세워 두고 사용
 # ================================
 WIN = 'webcam calibration'
 
@@ -33,8 +38,13 @@ class Calibrator(Node):
     def __init__(self):
         super().__init__('calibrate_webcam')
         self.pix_pts, self.map_pts = [], []
-        self.pending = None  # 웹캠에서 클릭했고 RViz 클릭을 기다리는 픽셀
-        self.create_subscription(PointStamped, '/clicked_point', self.on_point, 10)
+        self.pending = None  # 웹캠에서 클릭했고 map 좌표를 기다리는 픽셀
+        self.amcl_xy = None
+        self.create_subscription(PointStamped, CLICKED_TOPIC, self.on_point, 10)
+        # amcl_pose 는 TRANSIENT_LOCAL 로 발행되므로 QoS 를 맞춤
+        qos = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE,
+                         durability=DurabilityPolicy.TRANSIENT_LOCAL)
+        self.create_subscription(PoseWithCovarianceStamped, AMCL_TOPIC, self.on_amcl, qos)
 
     def on_mouse(self, event, u, v, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -45,13 +55,25 @@ class Calibrator(Node):
         if msg.header.frame_id != 'map':
             self.get_logger().warn(f"frame_id가 '{msg.header.frame_id}' 입니다. RViz Fixed Frame을 map으로 하세요")
             return
+        self.add_pair(msg.point.x, msg.point.y)
+
+    def on_amcl(self, msg):
+        self.amcl_xy = (msg.pose.pose.position.x, msg.pose.pose.position.y)
+
+    def use_amcl(self):
+        """'a' 키: 로봇이 pending 픽셀 위치에 서 있을 때 현재 amcl 위치를 map 좌표로 사용"""
+        if self.amcl_xy is None:
+            self.get_logger().warn(f'{AMCL_TOPIC} 수신 없음: localization/initial pose 확인')
+            return
+        self.add_pair(*self.amcl_xy)
+
+    def add_pair(self, x, y):
         if self.pending is None:
             self.get_logger().warn('먼저 웹캠 창에서 점을 클릭하세요')
             return
         self.pix_pts.append(self.pending)
-        self.map_pts.append((msg.point.x, msg.point.y))
-        self.get_logger().info(
-            f'[{len(self.pix_pts)}] 픽셀 {self.pending} <-> map ({msg.point.x:.3f}, {msg.point.y:.3f})')
+        self.map_pts.append((x, y))
+        self.get_logger().info(f'[{len(self.pix_pts)}] 픽셀 {self.pending} <-> map ({x:.3f}, {y:.3f})')
         self.pending = None
 
     def undo(self):
@@ -100,6 +122,8 @@ def main():
             key = cv2.waitKey(1) & 0xFF
             if key == ord('s'):
                 node.compute_and_save()
+            elif key == ord('a'):
+                node.use_amcl()
             elif key == ord('u'):
                 node.undo()
             elif key == ord('q'):
