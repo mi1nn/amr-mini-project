@@ -30,6 +30,7 @@ setup(
             'yolo_detector = rokey_pjt.yolo_detector:main',
             'calibrate_webcam = rokey_pjt.calibrate_webcam:main',
             'rc_car_follower = rokey_pjt.rc_car_follower:main',
+            'webcam_publisher = rokey_pjt.webcam_publisher:main',
         ],
     },
 )
