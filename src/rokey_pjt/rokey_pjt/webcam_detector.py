@@ -14,6 +14,7 @@ bbox 하단 중앙(바닥 접점)을 호모그래피에 넣으므로 바닥 평�
 예: ros2 run rokey_pjt webcam_detector --ros-args -p webcam_index:=2 -p classes:="['car']"
 """
 import os
+import time
 
 import cv2
 import numpy as np
@@ -32,8 +33,9 @@ WEBCAM_INDEX = 2  # calibrate_webcam 과 동일: 0 = 노트북 내장, 2 = USB �
 FRAME_SIZE = (640, 480)  # 캘리브레이션 때와 같은 해상도여야 H 가 맞음
 H_PATH = os.path.join(WS, 'webcam_H.npy')
 MODEL_PATH = os.path.join(WS, 'yolov8nbest.pt')
-CONF_THRESHOLD = 0.5
+CONF_THRESHOLD = 0.8
 MAP_FRAME = 'map'
+HOLD_SEC = 1.0  # 몇 프레임 탐지가 끊겨도 이 시간(초) 동안은 마지막 좌표를 계속 발행 (target_pose 만)
 # ================================
 WIN = 'webcam detector'
 
@@ -50,12 +52,15 @@ class WebcamDetector(Node):
         self.declare_parameter('classes', [''])  # 비어 있으면 모든 클래스. 예: ['car']
         self.declare_parameter('map_frame', MAP_FRAME)
         self.declare_parameter('show_window', True)
+        self.declare_parameter('hold_sec', HOLD_SEC)
 
         p = self.get_parameter
         self.conf = p('conf').value
         self.classes = {c for c in p('classes').value if c}
         self.map_frame = p('map_frame').value
         self.show_window = p('show_window').value
+        self.hold_sec = p('hold_sec').value
+        self.last_target = {}  # 클래스 -> (x, y, 탐지 시각)
 
         self.H = np.load(p('h_path').value)
         self.model = YOLO(p('model_path').value)
@@ -137,11 +142,16 @@ class WebcamDetector(Node):
         self.det_pub.publish(arr)
         self.marker_pub.publish(markers)
 
+        now = time.monotonic()
         for name, pub in self.target_pubs.items():
             same = [o for o in objects if o[0] == name]
-            if not same:
+            if same:
+                _, _, x, y = max(same, key=lambda o: o[1])  # 클래스별로 신뢰도 최고 1개
+                self.last_target[name] = (x, y, now)
+            elif name in self.last_target and now - self.last_target[name][2] <= self.hold_sec:
+                x, y, _ = self.last_target[name]  # 잠깐 놓침: 마지막 좌표 유지
+            else:
                 continue
-            _, _, x, y = max(same, key=lambda o: o[1])  # 클래스별로 신뢰도 최고 1개
             pose = PoseStamped()
             pose.header = arr.header
             pose.pose.position.x, pose.pose.position.y = x, y
